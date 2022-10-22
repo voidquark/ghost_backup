@@ -1,0 +1,84 @@
+---
+# tasks file for ghost_backup
+- name: Obtain details from config.production.json
+  block:
+    - name: Load file content from config.production.json
+      ansible.builtin.slurp:
+        src: "{{ ghost_backup_root_dir }}/config.production.json"
+      register: __config_production_json
+      no_log: true
+
+    - name: Get DB Username, DB Password, Content dir
+      ansible.builtin.set_fact:
+        __ghost_db_username: "{{ __config_production_json.content | b64decode | from_json | json_query('*.connection.user') | first }}"
+        __ghost_db_name: "{{ __config_production_json.content | b64decode | from_json | json_query('*.connection.database') | first }}"
+        __ghost_db_password: "{{ __config_production_json.content | b64decode | from_json | json_query('*.connection.password') | first }}"
+      no_log: true
+
+- name: Create backup and copy to localmachine
+  block:
+    - name: Create temporary directory
+      ansible.builtin.tempfile:
+        suffix: ghost_backup
+        state: directory
+      register: __tempfolder
+
+    - name: Create Database Backup
+      community.mysql.mysql_db:
+        name: "{{ __ghost_db_name }}"
+        encoding: "{{ ghost_backup_db_encoding }}"
+        login_user: "{{ __ghost_db_username }}"
+        login_password: "{{ __ghost_db_password }}"
+        state: dump
+        target: "{{ __tempfolder.path }}/{{ inventory_hostname }}_{{ __ghost_db_name }}_{{ ansible_date_time.iso8601 }}.gz"
+      register: __mysql_db_backup_cmd_result
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Archive Content Data
+      community.general.archive:
+        path: "{{ ghost_backup_content_path }}"
+        dest: "{{ __tempfolder.path }}/{{ inventory_hostname }}_ghost_content_dir_{{ ansible_date_time.iso8601 }}.zip"
+        remove: false
+        format: zip
+      register: __archive_cmd_result
+
+    - name: Copy backup to localmachine
+      ansible.builtin.fetch:
+        src: "{{ __copy_me }}"
+        dest: "{{ ghost_backup_local_dir }}"
+        flat: true
+      loop:
+        - "{{ __tempfolder.path }}/{{ inventory_hostname }}_{{ __ghost_db_name }}_{{ ansible_date_time.iso8601 }}.gz"
+        - "{{ __tempfolder.path }}/{{ inventory_hostname }}_ghost_content_dir_{{ ansible_date_time.iso8601 }}.gz"
+      loop_control:
+        loop_var: __copy_me
+
+  always:
+    - name: cleanup_tempfolder
+      ansible.builtin.file:
+        path: "{{ __tempfolder.path }}"
+        state: absent
+
+- name: Remove old local backup files
+  block:
+    - name: Find older files than "{{ ghost_backup_remove_older_files }}" days
+      ansible.builtin.find:
+        paths: "{{ ghost_backup_local_dir }}"
+        age: "{{ ghost_backup_remove_older_files }}"
+        file_type: file
+        age_stamp: mtime
+      register: __ghost_backup_local_files_to_remove
+      delegate_to: localhost
+      connection: local
+
+    - name: Remove older files than "{{ ghost_backup_remove_older_files }}" days
+      ansible.builtin.file:
+        path: "{{ __delete_me.path }}"
+        state: absent
+      delegate_to: localhost
+      connection: local
+      loop: "{{ __ghost_backup_local_files_to_remove.files }}"
+      loop_control:
+        loop_var: __delete_me
+
+  when: ghost_backup_remove_older_files is defined

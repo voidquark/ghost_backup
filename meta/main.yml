@@ -1,0 +1,21 @@
+galaxy_info:
+  author: voidquark
+  description: Ghost platform backup
+  company: VoidQuark
+
+  license: MIT
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: EL
+      versions:
+        - "7"
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all

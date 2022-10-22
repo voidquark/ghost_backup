@@ -1,0 +1,6 @@
+---
+# defaults file for ghost_backup
+ghost_backup_production_config_file: "{{ ghost_backup_root_dir }}/config.production.json"
+ghost_backup_content_path: "{{ ghost_backup_root_dir }}/content"
+ghost_backup_db_encoding: "utf8mb4"
+ghost_backup_remove_older_files: "30d"
