@@ -1,5 +1,7 @@
 # Ansible Role - Ghost Backup
 
+[![License](https://img.shields.io/github/license/voidquark/ghost_backup)](LICENSE)
+
 Ghost backup role for https://ghost.org blog platform. This role expected that you have already some central ansible server from where this role is executed. Backup is not stored on ghost(target) server but rather on ansible central server.
 
  Features of this role:
