@@ -16,6 +16,8 @@ Ensure that your ansible host have the following collection installed:
 - `ansible-galaxy collection install community.mysql`
 - `ansible-galaxy collection install community.general`
 
+Role is using `json_query` [filter](https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#selecting-json-data-json-queries). For that reason is required to install python `jmespath` on your ansible host ( ansible controller ).
+
 ## Role Variables
 
 - **Default Variables**. Usually there is no need to change this but rather overwrite value in `host_vars` or `group_vars` if required.
