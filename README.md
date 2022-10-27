@@ -4,11 +4,11 @@
 
 Ghost backup role for https://ghost.org blog platform. This role expected that you have already some central ansible server from where this role is executed. Backup is not stored on ghost(target) server but rather on ansible central server.
 
- Features of this role:
-- create MySQL dump ( by default with utf8mb4 encoding ) with GZ compression
-- archive ghost `content` directory with ZIP compression
-- Copy Database and Content backup to central ansible server
-- Prune old local backups ( by default 30days )
+Features of this role:
+- Create MySQL dump ( by default with utf8mb4 encoding ) with GZ compression.
+- Archive ghost `content` directory with ZIP compression.
+- Copy Database and Content backup to central ansible server.
+- Prune old local backups ( by default 30days ).
 
 ## Requirements
 
@@ -17,6 +17,9 @@ Ensure that your ansible host have the following collection installed:
 - `ansible-galaxy collection install community.general`
 
 Role is using `json_query` [filter](https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#selecting-json-data-json-queries). For that reason is required to install python `jmespath` on your ansible host ( ansible controller ).
+
+It is also required to have the following binary available on your target system.
+- `mysql` (command line binary) OR `mysqldump` (command line binary)
 
 ## Role Variables
 
