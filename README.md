@@ -1,4 +1,8 @@
-# Ansible Role - Ghost Backup
+# ARCHIVED
+
+I've stopped using the Ghost platform.
+
+## Ansible Role - Ghost Backup
 
 [![License](https://img.shields.io/github/license/voidquark/ghost_backup)](LICENSE)
 
